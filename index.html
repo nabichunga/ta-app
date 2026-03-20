@@ -4,18 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TA 자아상태 진단</title>
+
+<style>
+body { font-family: sans-serif; background:#f4f7f6; padding:20px; }
+.container { max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:15px; }
+.question { margin-bottom:15px; }
+button { margin:2px; padding:8px 10px; }
+button.active { background:#3498db; color:#fff; }
+.submit-btn { width:100%; padding:15px; margin-top:20px; }
+.result-box { margin-top:20px; padding:15px; background:#eef6ff; border-radius:10px; }
+</style>
+
 </head>
 
 <body>
 
+<div class="container">
 <h1>TA 자아상태 진단 (50문항)</h1>
 
 <div id="survey"></div>
-<button onclick="showResult()">결과 보기</button>
+<button class="submit-btn" onclick="showResult()">결과 보기</button>
 
 <div id="result"></div>
+</div>
 
 <script>
+
+// 👉 50문항
 const questions = [
 { id:1,text:"다른 사람을 비판하기 보다 칭찬을 주로 한다",type:"NP"},
 { id:2,text:"잘잘못을 가리지 않으면 불편하다",type:"CP"},
@@ -69,28 +84,61 @@ const questions = [
 { id:50,text:"비판적인 편이다",type:"CP"}
 ];
 
-let userScores={};
+// 점수 저장
+let userScores = {};
 
-const survey=document.getElementById('survey');
+// 질문 출력
+const survey = document.getElementById('survey');
 
 questions.forEach(q=>{
-const div=document.createElement('div');
-div.innerHTML = q.id+". "+q.text+"<br>" +
-[1,2,3,4,5].map(v=>`<button onclick="setScore(${q.id},${v})">${v}</button>`).join('');
+const div = document.createElement('div');
+div.className = "question";
+div.innerHTML = `
+<p>${q.id}. ${q.text}</p>
+${[1,2,3,4,5].map(v=>`<button onclick="setScore(${q.id},${v},this)">${v}</button>`).join('')}
+`;
 survey.appendChild(div);
 });
 
-function setScore(id,val){
-userScores[id]=val;
+// 점수 선택
+function setScore(id,val,btn){
+userScores[id] = val;
+btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
 }
 
+// 👉 결과 계산 (언어 이름 변경 완료)
 function showResult(){
-if(Object.keys(userScores).length<50){
+if(Object.keys(userScores).length < 50){
 alert("모든 문항을 체크해주세요");
 return;
 }
-document.getElementById('result').innerHTML="완료! 결과 계산 가능 상태입니다.";
+
+const sums = {CP:0,NP:0,A:0,FC:0,AC:0};
+questions.forEach(q => sums[q.type] += userScores[q.id]);
+
+// 👉 여기 핵심 (언어 변경)
+const labels = {
+CP: "통제의 언어",
+NP: "배려의 언어",
+A: "합리적 언어",
+FC: "표현의 언어",
+AC: "수용의 언어"
+};
+
+// 최고값 찾기
+let top = Object.keys(sums).reduce((a,b)=>sums[a]>sums[b]?a:b);
+
+// 결과 출력
+document.getElementById('result').innerHTML = `
+<div class="result-box">
+<h2>진단 결과</h2>
+<p><strong>당신의 주요 커뮤니케이션 스타일은</strong></p>
+<h3>${labels[top]}</h3>
+</div>
+`;
 }
+
 </script>
 
 </body>
