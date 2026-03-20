@@ -5,19 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TA 자아상태 진단</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
-body { font-family: sans-serif; background:#f4f7f6; padding:20px; }
-.container { max-width:700px; margin:auto; background:#fff; padding:20px; border-radius:15px; }
-.question { margin-bottom:15px; }
-button { margin:2px; padding:8px 10px; }
-button.active { background:#3498db; color:#fff; }
-.submit-btn { width:100%; padding:15px; margin-top:20px; }
+body {
+  font-family: 'Malgun Gothic', sans-serif;
+  background:#e9ecef;
+  padding:20px;
+}
 
-.chart { display:flex; justify-content:space-around; align-items:flex-end; height:200px; margin-top:20px; }
-.bar { width:60px; text-align:center; color:#fff; border-radius:5px 5px 0 0; padding-top:5px; font-size:14px; }
+.container {
+  max-width:800px;
+  margin:auto;
+  background:#fff;
+  padding:40px;
+  border:1px solid #ccc;
+}
+
+h1 {
+  text-align:center;
+  border-bottom:2px solid #333;
+  padding-bottom:10px;
+}
+
+input {
+  width:100%;
+  padding:8px;
+  margin:20px 0;
+  border:1px solid #999;
+}
+
+.question {
+  margin-bottom:20px;
+}
+
+button {
+  margin:2px;
+  padding:5px 8px;
+}
+
+button.active {
+  background:#2c7be5;
+  color:#fff;
+}
+
+.result-box {
+  margin-top:40px;
+  border-top:2px solid #333;
+  padding-top:20px;
+}
+
+/* 그래프 */
+.chart {
+  display:flex;
+  justify-content:space-around;
+  align-items:flex-end;
+  height:200px;
+  margin-top:30px;
+}
+
+.bar {
+  width:60px;
+  text-align:center;
+  color:#fff;
+  border-radius:5px 5px 0 0;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding-bottom:5px;
+  font-weight:bold;
+}
 
 .cp{background:#e74c3c;}
 .np{background:#2ecc71;}
@@ -25,32 +80,43 @@ button.active { background:#3498db; color:#fff; }
 .fc{background:#f1c40f;}
 .ac{background:#9b59b6;}
 
-.label-row { display:flex; justify-content:space-around; margin-top:10px; }
-.label-row div { width:60px; text-align:center; font-size:12px; }
+/* 라벨 */
+.label-row {
+  display:flex;
+  justify-content:space-around;
+  margin-top:10px;
+  font-size:13px;
+  text-align:center;
+}
 
-.score-box { margin-top:20px; }
-.score-item { margin:5px 0; }
+.label-row div {
+  width:60px;
+}
 
-.result-box { margin-top:20px; padding:15px; background:#eef6ff; border-radius:10px; }
+/* 점수 */
+.score-box {
+  margin-top:20px;
+  line-height:1.8;
+}
 </style>
 </head>
 
 <body>
 
-<div class="container" id="capture">
+<div class="container">
 <h1>TA 자아상태 진단</h1>
 
-<input type="text" id="username" placeholder="이름 입력" style="width:100%; padding:10px; margin-bottom:10px;">
+<input type="text" id="username" placeholder="이름 입력">
 
 <div id="survey"></div>
-<button class="submit-btn" onclick="showResult()">결과 보기</button>
+<button onclick="showResult()">결과 보기</button>
 
 <div id="result"></div>
 </div>
 
 <script>
 
-// 50문항
+// 질문
 const questions = [
 { id:1,text:"다른 사람을 비판하기 보다 칭찬을 주로 한다",type:"NP"},
 { id:2,text:"잘잘못을 가리지 않으면 불편하다",type:"CP"},
@@ -109,8 +175,8 @@ const survey = document.getElementById('survey');
 
 questions.forEach(q=>{
 const div = document.createElement('div');
-div.className = "question";
-div.innerHTML = `
+div.className="question";
+div.innerHTML=`
 <p>${q.id}. ${q.text}</p>
 ${[1,2,3,4,5].map(v=>`<button onclick="setScore(${q.id},${v},this)">${v}</button>`).join('')}
 `;
@@ -118,21 +184,22 @@ survey.appendChild(div);
 });
 
 function setScore(id,val,btn){
-userScores[id] = val;
+userScores[id]=val;
 btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
 btn.classList.add('active');
 }
 
 function showResult(){
-if(Object.keys(userScores).length < 50){
+
+if(Object.keys(userScores).length<50){
 alert("모든 문항을 체크해주세요");
 return;
 }
 
-const sums = {CP:0,NP:0,A:0,FC:0,AC:0};
-questions.forEach(q => sums[q.type] += userScores[q.id]);
+const sums={CP:0,NP:0,A:0,FC:0,AC:0};
+questions.forEach(q=>sums[q.type]+=userScores[q.id]);
 
-const labels = {
+const labels={
 CP:"통제의 언어",
 NP:"배려의 언어",
 A:"합리적 언어",
@@ -140,77 +207,51 @@ FC:"표현의 언어",
 AC:"수용의 언어"
 };
 
-const desc = {
-CP:"원칙과 기준이 분명하지만 강하게 보일 수 있습니다.",
-NP:"타인을 배려하고 따뜻한 관계를 만듭니다.",
-A:"논리적이고 객관적인 의사결정을 합니다.",
-FC:"감정 표현이 풍부하고 활력이 있습니다.",
-AC:"조화롭고 협력적인 태도를 가집니다."
-};
-
 // 상위 2개
-let sorted = Object.entries(sums).sort((a,b)=>b[1]-a[1]);
-let top1 = sorted[0][0];
-let top2 = sorted[1][0];
+let sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);
+let top1=sorted[0][0];
+let top2=sorted[1][0];
 
-const comboDesc = {
-"FC-NP":"표현력과 배려가 함께 높아 사람을 끌어당기는 소통 스타일입니다.",
-"A-NP":"논리와 배려를 함께 갖춘 균형 잡힌 커뮤니케이션입니다.",
-"CP-A":"원칙과 논리를 중시하는 리더형 스타일입니다.",
-"FC-CP":"표현은 강하지만 통제도 강해 갈등이 생길 수 있습니다.",
-"AC-NP":"타인을 배려하고 맞추는 협력형 스타일입니다."
+const comboDesc={
+"FC-NP":"표현과 배려가 조화된 관계 중심형",
+"A-NP":"논리와 배려를 갖춘 균형형",
+"CP-A":"원칙과 논리 중심 리더형",
+"AC-NP":"조화와 협력 중심형"
 };
 
-let comboText = comboDesc[top1+"-"+top2] || "상황에 따라 유연하게 소통하는 스타일입니다.";
+let comboText=comboDesc[top1+"-"+top2]||"유연한 커뮤니케이션 스타일";
 
 // 그래프
-let chartHTML = `<div class="chart">`;
+let chartHTML=`<div class="chart">`;
 for(let key in sums){
-chartHTML += `<div class="bar ${key.toLowerCase()}" style="height:${sums[key]*2}px">
-${sums[key]}
-</div>`;
+chartHTML+=`<div class="bar ${key.toLowerCase()}" style="height:${sums[key]*2}px">${sums[key]}</div>`;
 }
-chartHTML += `</div>`;
+chartHTML+=`</div>`;
 
 // 라벨
-chartHTML += `<div class="label-row">`;
+chartHTML+=`<div class="label-row">`;
 for(let key in sums){
-chartHTML += `<div>${labels[key]}</div>`;
+chartHTML+=`<div>${labels[key]}</div>`;
 }
-chartHTML += `</div>`;
+chartHTML+=`</div>`;
 
 // 점수표
-let scoreHTML = `<div class="score-box">`;
+let scoreHTML=`<div class="score-box">`;
 for(let key in sums){
-scoreHTML += `<div class="score-item">${labels[key]} : ${sums[key]}점</div>`;
+scoreHTML+=`${labels[key]} : ${sums[key]}점<br>`;
 }
-scoreHTML += `</div>`;
+scoreHTML+=`</div>`;
 
-document.getElementById('result').innerHTML = `
+document.getElementById('result').innerHTML=`
 <div class="result-box">
 <h2>진단 결과</h2>
 <h3>${labels[top1]}</h3>
-<p>${desc[top1]}</p>
-
-<h4>조합 해석 (${labels[top1]} + ${labels[top2]})</h4>
+<p>조합: ${labels[top1]} + ${labels[top2]}</p>
 <p>${comboText}</p>
-
 ${chartHTML}
 ${scoreHTML}
-
-<button class="submit-btn" onclick="downloadPDF()">PDF 저장</button>
 </div>
 `;
-}
-
-async function downloadPDF(){
-const { jsPDF } = window.jspdf;
-const canvas = await html2canvas(document.getElementById('capture'));
-const imgData = canvas.toDataURL('image/png');
-
-const pdf = new jsPDF();
-pdf.addImage(imgData,'PNG',10,10,190,0);
-pdf.save("TA결과.pdf");
 }
 
 </script>
