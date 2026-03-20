@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>TA 테스트</title>
+</head>
+
+<body>
+
+<h1>TA 자아상태 진단</h1>
+
+<div id="survey"></div>
+<button onclick="showResult()">결과 보기</button>
+
+<div id="result"></div>
+
+<script>
+const questions = [];
+for(let i=1;i<=50;i++){
+questions.push({id:i,text:i+"번 질문입니다",type:["CP","NP","A","FC","AC"][i%5]});
+}
+
+let userScores={};
+
+const survey=document.getElementById('survey');
+
+questions.forEach(q=>{
+const div=document.createElement('div');
+div.innerHTML = q.text + " " +
+[1,2,3,4,5].map(v=>`<button onclick="setScore(${q.id},${v})">${v}</button>`).join('');
+survey.appendChild(div);
+});
+
+function setScore(id,val){
+userScores[id]=val;
+}
+
+function showResult(){
+if(Object.keys(userScores).length<50){
+alert("다 체크하세요");
+return;
+}
+document.getElementById('result').innerHTML="완료!";
+}
+</script>
+
+</body>
+</html>
