@@ -5,22 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TA 자아상태 진단</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 body { font-family: sans-serif; background:#f4f7f6; padding:20px; }
-.container { max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:15px; }
+.container { max-width:700px; margin:auto; background:#fff; padding:20px; border-radius:15px; }
 .question { margin-bottom:15px; }
 button { margin:2px; padding:8px 10px; }
 button.active { background:#3498db; color:#fff; }
 .submit-btn { width:100%; padding:15px; margin-top:20px; }
+
+.chart { display:flex; justify-content:space-around; align-items:flex-end; height:200px; margin-top:20px; }
+.bar { width:50px; text-align:center; color:#fff; border-radius:5px 5px 0 0; }
+.cp{background:#e74c3c;} .np{background:#2ecc71;}
+.a{background:#3498db;} .fc{background:#f1c40f;}
+.ac{background:#9b59b6;}
+
 .result-box { margin-top:20px; padding:15px; background:#eef6ff; border-radius:10px; }
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
-<h1>TA 자아상태 진단 (50문항)</h1>
+<div class="container" id="capture">
+<h1>TA 자아상태 진단</h1>
 
 <div id="survey"></div>
 <button class="submit-btn" onclick="showResult()">결과 보기</button>
@@ -30,7 +39,7 @@ button.active { background:#3498db; color:#fff; }
 
 <script>
 
-// 👉 50문항
+// 50문항
 const questions = [
 { id:1,text:"다른 사람을 비판하기 보다 칭찬을 주로 한다",type:"NP"},
 { id:2,text:"잘잘못을 가리지 않으면 불편하다",type:"CP"},
@@ -84,12 +93,10 @@ const questions = [
 { id:50,text:"비판적인 편이다",type:"CP"}
 ];
 
-// 점수 저장
 let userScores = {};
-
-// 질문 출력
 const survey = document.getElementById('survey');
 
+// 질문 출력
 questions.forEach(q=>{
 const div = document.createElement('div');
 div.className = "question";
@@ -100,14 +107,13 @@ ${[1,2,3,4,5].map(v=>`<button onclick="setScore(${q.id},${v},this)">${v}</button
 survey.appendChild(div);
 });
 
-// 점수 선택
 function setScore(id,val,btn){
 userScores[id] = val;
 btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
 btn.classList.add('active');
 }
 
-// 👉 결과 계산 (언어 이름 변경 완료)
+// 결과
 function showResult(){
 if(Object.keys(userScores).length < 50){
 alert("모든 문항을 체크해주세요");
@@ -117,26 +123,51 @@ return;
 const sums = {CP:0,NP:0,A:0,FC:0,AC:0};
 questions.forEach(q => sums[q.type] += userScores[q.id]);
 
-// 👉 여기 핵심 (언어 변경)
 const labels = {
-CP: "통제의 언어",
-NP: "배려의 언어",
-A: "합리적 언어",
-FC: "표현의 언어",
-AC: "수용의 언어"
+CP:"통제의 언어",
+NP:"배려의 언어",
+A:"합리적 언어",
+FC:"표현의 언어",
+AC:"수용의 언어"
 };
 
-// 최고값 찾기
+const desc = {
+CP:"원칙과 기준이 분명하지만, 강하게 보일 수 있습니다.",
+NP:"타인을 배려하고 따뜻한 관계를 만듭니다.",
+A:"논리적이고 객관적인 의사결정을 합니다.",
+FC:"감정 표현이 풍부하고 활력이 있습니다.",
+AC:"조화롭고 협력적인 태도를 가집니다."
+};
+
 let top = Object.keys(sums).reduce((a,b)=>sums[a]>sums[b]?a:b);
 
-// 결과 출력
+// 그래프
+let chartHTML = `<div class="chart">`;
+for(let key in sums){
+chartHTML += `<div class="bar ${key.toLowerCase()}" style="height:${sums[key]*2}px">${labels[key]}</div>`;
+}
+chartHTML += `</div>`;
+
 document.getElementById('result').innerHTML = `
 <div class="result-box">
 <h2>진단 결과</h2>
-<p><strong>당신의 주요 커뮤니케이션 스타일은</strong></p>
 <h3>${labels[top]}</h3>
+<p>${desc[top]}</p>
+${chartHTML}
+<button class="submit-btn" onclick="downloadPDF()">PDF 저장</button>
 </div>
 `;
+}
+
+// PDF
+async function downloadPDF(){
+const { jsPDF } = window.jspdf;
+const canvas = await html2canvas(document.getElementById('capture'));
+const imgData = canvas.toDataURL('image/png');
+
+const pdf = new jsPDF();
+pdf.addImage(imgData,'PNG',10,10,190,0);
+pdf.save("TA결과.pdf");
 }
 
 </script>
