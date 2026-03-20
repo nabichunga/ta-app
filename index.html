@@ -17,10 +17,16 @@ button.active { background:#3498db; color:#fff; }
 .submit-btn { width:100%; padding:15px; margin-top:20px; }
 
 .chart { display:flex; justify-content:space-around; align-items:flex-end; height:200px; margin-top:20px; }
-.bar { width:60px; text-align:center; color:#fff; border-radius:5px 5px 0 0; padding-top:5px; font-size:12px; }
-.cp{background:#e74c3c;} .np{background:#2ecc71;}
-.a{background:#3498db;} .fc{background:#f1c40f;}
+.bar { width:60px; text-align:center; color:#fff; border-radius:5px 5px 0 0; padding-top:5px; font-size:14px; }
+
+.cp{background:#e74c3c;}
+.np{background:#2ecc71;}
+.a{background:#3498db;}
+.fc{background:#f1c40f;}
 .ac{background:#9b59b6;}
+
+.label-row { display:flex; justify-content:space-around; margin-top:10px; }
+.label-row div { width:60px; text-align:center; font-size:12px; }
 
 .score-box { margin-top:20px; }
 .score-item { margin:5px 0; }
@@ -142,12 +148,11 @@ FC:"감정 표현이 풍부하고 활력이 있습니다.",
 AC:"조화롭고 협력적인 태도를 가집니다."
 };
 
-// 👉 상위 2개 찾기
+// 상위 2개
 let sorted = Object.entries(sums).sort((a,b)=>b[1]-a[1]);
 let top1 = sorted[0][0];
 let top2 = sorted[1][0];
 
-// 👉 조합 해석
 const comboDesc = {
 "FC-NP":"표현력과 배려가 함께 높아 사람을 끌어당기는 소통 스타일입니다.",
 "A-NP":"논리와 배려를 함께 갖춘 균형 잡힌 커뮤니케이션입니다.",
@@ -156,22 +161,28 @@ const comboDesc = {
 "AC-NP":"타인을 배려하고 맞추는 협력형 스타일입니다."
 };
 
-let comboKey = top1+"-"+top2;
-let comboText = comboDesc[comboKey] || "상황에 따라 다양한 커뮤니케이션을 사용하는 유연한 스타일입니다.";
+let comboText = comboDesc[top1+"-"+top2] || "상황에 따라 유연하게 소통하는 스타일입니다.";
 
 // 그래프
 let chartHTML = `<div class="chart">`;
 for(let key in sums){
 chartHTML += `<div class="bar ${key.toLowerCase()}" style="height:${sums[key]*2}px">
-<strong>${sums[key]}</strong><br>${labels[key]}
+${sums[key]}
 </div>`;
+}
+chartHTML += `</div>`;
+
+// 라벨
+chartHTML += `<div class="label-row">`;
+for(let key in sums){
+chartHTML += `<div>${labels[key]}</div>`;
 }
 chartHTML += `</div>`;
 
 // 점수표
 let scoreHTML = `<div class="score-box">`;
 for(let key in sums){
-scoreHTML += `<div class="score-item">${labels[key]} : <strong>${sums[key]}점</strong></div>`;
+scoreHTML += `<div class="score-item">${labels[key]} : ${sums[key]}점</div>`;
 }
 scoreHTML += `</div>`;
 
@@ -192,7 +203,6 @@ ${scoreHTML}
 `;
 }
 
-// PDF
 async function downloadPDF(){
 const { jsPDF } = window.jspdf;
 const canvas = await html2canvas(document.getElementById('capture'));
