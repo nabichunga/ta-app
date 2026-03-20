@@ -17,10 +17,13 @@ button.active { background:#3498db; color:#fff; }
 .submit-btn { width:100%; padding:15px; margin-top:20px; }
 
 .chart { display:flex; justify-content:space-around; align-items:flex-end; height:200px; margin-top:20px; }
-.bar { width:50px; text-align:center; color:#fff; border-radius:5px 5px 0 0; }
+.bar { width:60px; text-align:center; color:#fff; border-radius:5px 5px 0 0; padding-top:5px; font-size:12px; }
 .cp{background:#e74c3c;} .np{background:#2ecc71;}
 .a{background:#3498db;} .fc{background:#f1c40f;}
 .ac{background:#9b59b6;}
+
+.score-box { margin-top:20px; }
+.score-item { margin:5px 0; }
 
 .result-box { margin-top:20px; padding:15px; background:#eef6ff; border-radius:10px; }
 </style>
@@ -31,6 +34,8 @@ button.active { background:#3498db; color:#fff; }
 <div class="container" id="capture">
 <h1>TA 자아상태 진단</h1>
 
+<input type="text" id="username" placeholder="이름 입력" style="width:100%; padding:10px; margin-bottom:10px;">
+
 <div id="survey"></div>
 <button class="submit-btn" onclick="showResult()">결과 보기</button>
 
@@ -39,7 +44,7 @@ button.active { background:#3498db; color:#fff; }
 
 <script>
 
-// 50문항
+// 50문항 (동일)
 const questions = [
 { id:1,text:"다른 사람을 비판하기 보다 칭찬을 주로 한다",type:"NP"},
 { id:2,text:"잘잘못을 가리지 않으면 불편하다",type:"CP"},
@@ -113,7 +118,6 @@ btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('acti
 btn.classList.add('active');
 }
 
-// 결과
 function showResult(){
 if(Object.keys(userScores).length < 50){
 alert("모든 문항을 체크해주세요");
@@ -132,7 +136,7 @@ AC:"수용의 언어"
 };
 
 const desc = {
-CP:"원칙과 기준이 분명하지만, 강하게 보일 수 있습니다.",
+CP:"원칙과 기준이 분명하지만 강하게 보일 수 있습니다.",
 NP:"타인을 배려하고 따뜻한 관계를 만듭니다.",
 A:"논리적이고 객관적인 의사결정을 합니다.",
 FC:"감정 표현이 풍부하고 활력이 있습니다.",
@@ -144,9 +148,18 @@ let top = Object.keys(sums).reduce((a,b)=>sums[a]>sums[b]?a:b);
 // 그래프
 let chartHTML = `<div class="chart">`;
 for(let key in sums){
-chartHTML += `<div class="bar ${key.toLowerCase()}" style="height:${sums[key]*2}px">${labels[key]}</div>`;
+chartHTML += `<div class="bar ${key.toLowerCase()}" style="height:${sums[key]*2}px">
+${sums[key]}<br>${labels[key]}
+</div>`;
 }
 chartHTML += `</div>`;
+
+// 점수 표시
+let scoreHTML = `<div class="score-box">`;
+for(let key in sums){
+scoreHTML += `<div class="score-item">${labels[key]} : ${sums[key]}점</div>`;
+}
+scoreHTML += `</div>`;
 
 document.getElementById('result').innerHTML = `
 <div class="result-box">
@@ -154,6 +167,7 @@ document.getElementById('result').innerHTML = `
 <h3>${labels[top]}</h3>
 <p>${desc[top]}</p>
 ${chartHTML}
+${scoreHTML}
 <button class="submit-btn" onclick="downloadPDF()">PDF 저장</button>
 </div>
 `;
