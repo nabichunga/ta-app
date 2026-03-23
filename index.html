@@ -67,7 +67,8 @@
 <canvas id="chart" style="display:none;"></canvas>
 
 <script>
-const scriptURL = https://script.google.com/macros/s/AKfycbxCYOdFXXjvNWNm2d_AgVy_ZfxeoRqGpdJeHmJx75BS4w91igg6wyFA9fuUaIruRsOEqg/exec
+// ⚠️ 65행: 이곳에 새로 배포한 웹 앱 URL을 꼭 넣어주세요!
+const scriptURL = "https://script.google.com/macros/s/AKfycbxT4M1rZrdeGMVjr7zJJtXQHkyYBeMw0pvnV2UomngOZBQR409VtxSqNkHqyzMI7BgHUg/exec"
 
 const questions = [
     ["나는 규칙과 기준을 지키는 것을 중요하게 생각한다","통제의언어"], ["나는 나보다 다른 사람을 먼저 배려하려 한다","배려의언어"], ["나는 말과 행동을 할 때 냉정하고 침착하게 한다","합리적언어"], ["나는 감정을 솔직하게 표현한다","표현의언어"], ["나는 다른 사람 기대에 맞추려 한다","수용의언어"],
@@ -100,27 +101,27 @@ function showResult() {
     if (!nameInput) { alert("성함을 입력해 주세요."); return; }
 
     const selected = document.querySelectorAll("input[type='radio']:checked");
-    if (selected.length < 50) { alert("모든 문항에 응답해주세요. 현재 " + selected.length + "개 응답함."); return; }
+    if (selected.length < 50) { alert("모든 문항에 응답해주세요."); return; }
 
     let score = {name: nameInput, 통제의언어: 0, 배려의언어: 0, 합리적언어: 0, 표현의언어: 0, 수용의언어: 0};
     selected.forEach(s => { const type = s.name.split("_")[2]; score[type] += parseInt(s.value); });
 
     let analysisMsg = "";
     if (score.배려의언어 >= 35 && score.표현의언어 >= 30) {
-        analysisMsg = "당신은 사람을 배려하고 관계를 중요하게 생각하는 따뜻한 소통가입니다. 즐거운 분위기를 만드는 데 강점이 있으며 주변에 긍정적인 에너지를 전달합니다. 다만 가끔은 자신의 논리적인 판단(합리적 언어)을 믿고 추진해 보세요.";
+        analysisMsg = "당신은 사람을 배려하고 관계를 중요하게 생각하는 따뜻한 소통가입니다. 즐거운 분위기를 만드는 데 강점이 있으며 주변에 긍정적인 에너지를 전달합니다.";
     } else if (score.합리적언어 >= 35) {
-        analysisMsg = "매우 분석적이고 합리적인 사고를 가진 문제 해결사 타입입니다. 사실과 데이터를 기반으로 상황을 파악하는 능력이 탁월합니다. 상대방의 감정을 읽어주는 배려의 언어를 더해주신다면 완벽한 소통가가 되실 거예요.";
+        analysisMsg = "매우 분석적이고 합리적인 사고를 가진 문제 해결사 타입입니다. 사실과 데이터를 기반으로 상황을 파악하는 능력이 탁월합니다.";
     } else if (score.통제의언어 >= 35) {
-        analysisMsg = "명확한 주관과 도덕적 기준을 가진 리더십이 돋보입니다. 책임감이 강하고 질서를 중시하는 추진력이 큰 강점입니다. 타인에게 조금 더 관대한 태도와 자유로운 표현의 언어를 허용한다면 더욱 유연한 관계를 맺을 수 있습니다.";
+        analysisMsg = "명확한 주관과 도덕적 기준을 가진 리더십이 돋보입니다. 책임감이 강하고 질서를 중시하는 추진력이 큰 강점입니다.";
     } else {
-        analysisMsg = "전체적으로 균형 잡힌 자아 상태를 유지하고 계십니다. 상황에 맞춰 적절한 자아를 활용하는 유연성이 돋보이네요. 현재의 강점을 살리면서 자신이 더 개발하고 싶은 부분을 의식적으로 연습해 보시기 바랍니다.";
+        analysisMsg = "전체적으로 균형 잡힌 자아 상태를 유지하고 계십니다. 유연한 소통 능력이 돋보입니다.";
     }
 
     const resDiv = document.getElementById("result");
     resDiv.style.display = "block";
     resDiv.innerHTML = `
         <h3 style="margin:0 0 15px 0; border-bottom:2px solid #eee; padding-bottom:10px;">${nameInput} 님의 진단 결과</h3>
-        <p style="font-size:1.1rem; line-height:1.8; color:var(--dark);">
+        <p style="font-size:1.1rem; line-height:1.6; color:var(--dark);">
             통제의 언어: ${score.통제의언어} / 배려의 언어: ${score.배려의언어} / 합리적 언어: ${score.합리적언어} <br>
             표현의 언어: ${score.표현의언어} / 수용의 언어: ${score.수용의언어}
         </p>
@@ -147,6 +148,7 @@ function showResult() {
         options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 50 } } }
     });
 
+    // 🚀 데이터 전송 (가장 중요한 부분)
     fetch(scriptURL, { method: "POST", mode: "no-cors", body: JSON.stringify(score) });
     window.scrollTo({ top: resDiv.offsetTop - 20, behavior: 'smooth' });
 }
